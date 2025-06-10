@@ -23,7 +23,7 @@ class ShiftController(val repository: ShiftRepository) {
             "add" -> repository.save(shift)
         }
 
-        return "{status: 'ok'}"
+        return "{\"status\": \"ok\"}"
     }
 
     @GetMapping("/shifts")
