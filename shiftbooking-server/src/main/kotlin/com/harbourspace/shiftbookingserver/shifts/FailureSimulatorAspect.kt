@@ -14,7 +14,7 @@ class FailureSimulatorAspect {
     fun simulate(joinPoint: ProceedingJoinPoint): Any? {
         val random = Math.random()
         return when {
-            random < 0.2 -> joinPoint.proceed()
+            random < 2 -> joinPoint.proceed()
             random < 0.9 -> throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)
             else -> {
                 Thread.sleep(1000)

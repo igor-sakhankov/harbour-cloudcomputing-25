@@ -1,13 +1,12 @@
 package com.harbourspace.shiftbookingserver.shifts
 
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class ShiftController(val repository: ShiftRepository) {
+class ShiftController(val service: ShiftService) {
 
     @FailureSimulator
     @PostMapping("/shifts")
@@ -20,15 +19,16 @@ class ShiftController(val repository: ShiftRepository) {
             endTime = shiftVm.endTime
         )
         when (shiftVm.action) {
-            "add" -> repository.save(shift)
+            ShiftAction.ADD -> service.save(shift)
+            ShiftAction.DELETE -> service.delete(shift)
         }
 
-        return "{status: 'ok'}"
+        return "{status: \"ok\"}"
     }
 
     @GetMapping("/shifts")
     fun getShifts(): ShiftsViewVm {
-        val shifts = repository.findAll().map { shift ->
+        val shifts = service.findAll().map { shift ->
             ShiftViewVm(
                 shiftId = shift.id,
                 companyId = shift.companyId,
@@ -38,17 +38,6 @@ class ShiftController(val repository: ShiftRepository) {
             )
         }
         return ShiftsViewVm(shifts)
-    }
-
-    @DeleteMapping("/shifts/{shiftId}")
-    fun deleteShift(@RequestBody shiftId: Long): String {
-        val shift = repository.findById(shiftId)
-        if (shift.isPresent) {
-            repository.delete(shift.get())
-            return "{status: 'ok'}"
-        } else {
-            throw IllegalStateException("Shift not found")
-        }
     }
 }
 
@@ -61,7 +50,7 @@ class ShiftVm(
     val userId: String,
     val startTime: String,
     val endTime: String,
-    val action: String
+    val action: ShiftAction
 )
 
 class ShiftViewVm(
