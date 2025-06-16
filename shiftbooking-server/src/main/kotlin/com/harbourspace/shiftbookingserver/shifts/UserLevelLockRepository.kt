@@ -1,0 +1,3 @@
+package com.harbourspace.shiftbookingserver.shifts
+
+interface UserLevelLockRepository
