@@ -1,12 +1,11 @@
 package com.harbourspace.shiftbookingserver.shifts
 
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties.IsolationLevel
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class ShiftService(val repository: ShiftRepository, val userLevelLockRepository: UserLevelLockRepository) {
+class ShiftService(val repository: ShiftRepository) {
 
     @Transactional(isolation= Isolation.SERIALIZABLE)
     fun save(shift: Shift) {

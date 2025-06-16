@@ -4,8 +4,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class ShiftbookingServerApplication
+class ShiftBookingServerApplication
 
 fun main(args: Array<String>) {
-    runApplication<ShiftbookingServerApplication>(*args)
+    runApplication<ShiftBookingServerApplication>(*args)
 }
