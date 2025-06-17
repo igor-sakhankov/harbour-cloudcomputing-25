@@ -1,7 +1,6 @@
 package com.harbourspace.shiftbookingserver.sqs
 
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -31,7 +30,7 @@ class CustomSqsController(
         }
     }
 
-    @Scheduled(fixedDelay = 100)
+    @PostMapping("/sqs/listen")
     fun listenToSqs() {
         val request = ReceiveMessageRequest.builder()
             .queueUrl(queueUrl)
