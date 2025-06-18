@@ -1,0 +1,30 @@
+services:
+  database:
+    image: mysql:8.0
+    container_name: aurora-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+
+  app:
+    image: openjdk:21
+    container_name: my-java-app
+    depends_on:
+      - database
+    volumes:
+      - ./shiftbooking-server/build/libs/shiftbooking-server-0.0.1-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: ["java", "-jar", "app.jar"]
+    environment:
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+      DB_CONNECTION_URL: ${DB_CONNECTION_URL}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_USER: ${DB_USER}
+    ports:
+      - "8080:8080"
