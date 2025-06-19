@@ -14,6 +14,7 @@ java {
 dependencyManagement {
     imports {
         mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
+        mavenBom("software.amazon.awssdk:bom:2.25.10")
     }
 }
 
@@ -22,9 +23,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("software.amazon.awssdk:dynamodb")
+    implementation("software.amazon.awssdk:dynamodb-enhanced")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
