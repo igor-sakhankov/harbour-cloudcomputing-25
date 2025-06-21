@@ -14,7 +14,7 @@ instance = ec2.create_instances(
     MinCount=1,
     MaxCount=1,
     InstanceType='t2.micro',
-    KeyName='your-key-name',  
+    KeyName='assignment-key',
     UserData=user_data_script,
     NetworkInterfaces=[{
         'DeviceIndex': 0,
