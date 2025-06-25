@@ -26,6 +26,7 @@ replay_pid*
 # Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
 .kotlin/
 .gradle/
+!gradle/wrapper/gradle-wrapper.jar
 build/
 .idea/.name
 .idea/compiler.xml
@@ -34,3 +35,4 @@ build/
 .idea/misc.xml
 .idea/vcs.xml
 .idea/workspace.xml
+.env
