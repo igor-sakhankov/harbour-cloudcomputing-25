@@ -53,5 +53,4 @@ resource "aws_apprunner_service" "config_server" {
   #   ignore_changes = [
   #     source_configuration
   #   ]
-  # }
 }

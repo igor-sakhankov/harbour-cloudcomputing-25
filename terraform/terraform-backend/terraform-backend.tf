@@ -32,14 +32,14 @@ output "dynamodb_table_name" {
 }
 
 
-terraform {
-  backend "s3" {
-    bucket         = "harbour-25-terraform-state"
-    key            = "global/s3/terraform.tfstate"
-    region         = "us-east-1"
-
-    dynamodb_table = "terraform-up-and-running-locks"
-    encrypt        = true
-  }
-}
+# terraform {
+#   backend "s3" {
+#     bucket         = "harbour-25-terraform-state"
+#     key            = "global/s3/terraform.tfstate"
+#     region         = "us-east-1"
+#
+#     dynamodb_table = "terraform-up-and-running-locks"
+#     encrypt        = true
+#   }
+# }
 
