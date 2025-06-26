@@ -53,4 +53,17 @@ resource "aws_apprunner_service" "config_server" {
   #   ignore_changes = [
   #     source_configuration
   #   ]
+
+
+}
+
+terraform {
+  backend "s3" {
+    bucket         = "harbour-25-terraform-state-lecture"
+    key            = "global/s3/terraform.tfstate"
+    region         = "us-east-1"
+
+    dynamodb_table = "terraform-up-and-running-locks"
+    encrypt        = true
+  }
 }
