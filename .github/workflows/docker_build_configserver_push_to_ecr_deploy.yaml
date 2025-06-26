@@ -63,4 +63,4 @@ jobs:
           
           aws apprunner update-service \
             --service-arn $SERVICE_ARN \
-            --source-configuration "ImageRepositoryConfiguration={ImageIdentifier=${{ env.IMAGE_URI}},ImageRepositoryType=ECR},AutoDeploymentsEnabled=true"
+            --source-configuration "ImageRepository={ImageIdentifier=${{ env.IMAGE_URI}},ImageRepositoryType=ECR},AutoDeploymentsEnabled=true"
