@@ -8,7 +8,6 @@ class HealthController {
 
     @GetMapping("/health")
     fun health(): String {
-        // This endpoint is used to check the health of the Config Server
         return "{\"status\": \"UP\"}"
     }
 }
