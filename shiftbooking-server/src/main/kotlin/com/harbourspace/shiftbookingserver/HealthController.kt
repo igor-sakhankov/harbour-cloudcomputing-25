@@ -14,5 +14,9 @@ class HealthController(private val environment: Environment) {
     fun properties(@PathVariable name: String): String {
         return environment.getProperty(name) ?: "Property '$name' not found"
     }
+
+    @GetMapping("/health2")
+    fun health2() = "OK"
+
 }
 
