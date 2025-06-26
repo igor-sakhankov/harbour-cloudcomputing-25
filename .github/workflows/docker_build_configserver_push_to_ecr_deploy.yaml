@@ -1,13 +1,15 @@
-name: Build Spring Boot Image and Push to ECR
+name: Build Config Server Image and Push to ECR and Deploy to AWS App Runner
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'config-server/**'
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: shiftbooking-server
+  ECR_REPOSITORY: config-server
 
 jobs:
   build-and-push:
@@ -41,7 +43,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           IMAGE_URI=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
-          ./gradlew :shiftbooking-server:bootBuildImage \
+          ./gradlew :config-server:bootBuildImage \
             --imageName=$IMAGE_URI
 
       - name: Push image to ECR
@@ -51,3 +53,16 @@ jobs:
         run: |
           IMAGE_URI=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
           docker push $IMAGE_URI
+
+          - name: Deploy to AWS App Runner
+            run: |
+              SERVICE_ARN=$(aws apprunner list-services \
+                --query "ServiceSummaryList[?ServiceName=='config-server'].ServiceArn" \
+                --output text)
+          
+              IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          
+              aws apprunner update-service \
+                --service-arn $SERVICE_ARN \
+                --source-configuration ImageRepositoryConfiguration="{ImageIdentifier=${IMAGE_URI},ImageRepositoryType=ECR}" \
+                --auto-deployments-enabled
