@@ -46,7 +46,7 @@ jobs:
           ./gradlew :config-server:bootBuildImage \
             --imageName=$IMAGE_URI
 
-      - name: Push image to ECR
+      - name: Push image to ECR and deploy to AWS App Runner
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}

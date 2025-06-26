@@ -34,10 +34,10 @@ resource "aws_apprunner_service" "config_server" {
 
     image_repository {
       image_configuration {
-        port = "8080"
+        port = "8888"
       }
 
-      image_identifier      = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/config-server:latest"
+      image_identifier      = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/config-server:7a3312eabc8677b71a3ca768c390af63840b176c"
       image_repository_type = "ECR"
     }
 

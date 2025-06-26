@@ -5,6 +5,7 @@ metadata:
   labels:
     app: config-server
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: config-server
