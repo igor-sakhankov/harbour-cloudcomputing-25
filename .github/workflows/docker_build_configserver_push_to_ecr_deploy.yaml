@@ -46,23 +46,22 @@ jobs:
           ./gradlew :config-server:bootBuildImage \
             --imageName=$IMAGE_URI
 
-      - name: Push image to ECR and deploy to AWS App Runner
+      - name: Push image to ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           IMAGE_URI=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
           docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-          - name: Deploy to AWS App Runner
-            run: |
-              SERVICE_ARN=$(aws apprunner list-services \
-                --query "ServiceSummaryList[?ServiceName=='config-server'].ServiceArn" \
-                --output text)
+      - name: Deploy to AWS App Runner
+        run: |
+          SERVICE_ARN=$(aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='config-server'].ServiceArn" \
+            --output text)
           
-              IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-          
-              aws apprunner update-service \
-                --service-arn $SERVICE_ARN \
-                --source-configuration ImageRepositoryConfiguration="{ImageIdentifier=${IMAGE_URI},ImageRepositoryType=ECR}" \
-                --auto-deployments-enabled
+          aws apprunner update-service \
+            --service-arn $SERVICE_ARN \
+            --source-configuration ImageRepositoryConfiguration="{ImageIdentifier=${{ env.IMAGE_URI }},ImageRepositoryType=ECR}" \
+            --auto-deployments-enabled
