@@ -49,11 +49,11 @@ resource "aws_apprunner_service" "config_server" {
   }
 
 
-  # lifecycle {
-  #   ignore_changes = [
-  #     source_configuration
-  #   ]
-
+  lifecycle {
+    ignore_changes = [
+      source_configuration
+    ]
+  }
 
 }
 
