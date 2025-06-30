@@ -60,7 +60,7 @@ class ShiftProcessingService(
             val batch = shift.batch
             val remaining = shiftRequestRepository.findByStatus(ProcessingStatus.PENDING)
                 .count { it.batch.id == batch.id }
-            if (remaining == 0L) {
+            if (remaining == 0) {
                 batch.status = ProcessingStatus.COMPLETED
                 batchRequestRepository.save(batch)
             }
