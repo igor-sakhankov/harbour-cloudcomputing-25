@@ -2,9 +2,7 @@ package com.harbourspace.client.shifts
 
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
@@ -12,7 +10,11 @@ import reactor.util.retry.Retry
 import java.time.Duration
 
 @RestController
-class ClientController(val httpClient: WebClient) {
+class ClientController(
+    val httpClient: WebClient,
+    val batchRepository: BatchRequestRepository,
+    val shiftRequestRepository: ShiftRequestRepository
+) {
     private val logger = LoggerFactory.getLogger(ClientController::class.java)
 
     @GetMapping("/clientshifts")
@@ -40,58 +42,33 @@ class ClientController(val httpClient: WebClient) {
     }
 
     @PostMapping("/clientshifts")
-    fun modifyShifts(@RequestBody shiftsVm: ShiftsRequestVm): String {
-        logger.info("Received request to add ${shiftsVm.shifts.size} shifts")
-        
-        // Process each shift with unlimited retries until successful
+    fun modifyShifts(@RequestBody shiftsVm: ShiftsRequestVm): BatchResponseVm {
+        logger.info("Received async request with ${shiftsVm.shifts.size} shifts")
+
+        val batch = batchRepository.save(BatchRequest())
         shiftsVm.shifts.forEach { shift ->
-            val shiftVm = ShiftRequestVm(
+            val entity = ShiftRequestEntity(
+                batch = batch,
                 companyId = shift.companyId,
                 userId = shift.userId,
                 startTime = shift.startTime,
                 endTime = shift.endTime,
                 action = shift.action,
+                status = ProcessingStatus.PENDING
             )
-            
-            var success = false
-            var attempts = 0
-
-            while (!success) {
-                attempts++
-                try {
-                    logger.info("Attempting to add shift for user ${shift.userId} (Attempt #$attempts)")
-                    
-                    val response = httpClient.post()
-                        .uri("/shifts")
-                        .bodyValue(shiftVm)
-                        .retrieve()
-                        .bodyToMono(String::class.java)
-                        .onErrorResume { error ->
-                            // Log the error but don't propagate it so we can retry
-                            logger.error("Error adding shift for user ${shift.userId}: ${error.message}")
-                            Mono.empty()
-                        }
-                        .block(Duration.ofSeconds(5))
-                    
-                    if (response != null) {
-                        success = true
-                        logger.info("Successfully added shift for user ${shift.userId} after $attempts attempts")
-                    } else {
-                        // If response is null, we had an error but caught it, so we need to retry
-                        // Wait before retrying to avoid overwhelming the server
-                        Thread.sleep(1000)
-                        logger.info("Retrying after error for user ${shift.userId}")
-                    }
-                } catch (e: Exception) {
-                    logger.error("Exception during shift booking for user ${shift.userId}: ${e.message}")
-                    // Wait a bit longer after exceptions
-                    Thread.sleep(2000)
-                }
-            }
+            shiftRequestRepository.save(entity)
         }
 
-        logger.info("All shifts successfully processed")
-        return "{\"status\": \"ok\"}"
+        return BatchResponseVm(batch.id, batch.status.name)
+    }
+
+    @GetMapping("/clientshifts/{batchId}")
+    fun getBatchStatus(@PathVariable batchId: Long): BatchStatusVm {
+        val batch = batchRepository.findById(batchId).orElseThrow()
+        val shifts = shiftRequestRepository.findAll()
+            .filter { it.batch.id == batchId }
+            .map { ShiftStatusVm(it.id, it.status.name) }
+        return BatchStatusVm(batch.id, batch.status.name, shifts)
     }
 }
 
@@ -119,4 +96,21 @@ class ShiftResponseVm(
     val userId: String,
     val startTime: String,
     val endTime: String
+)
+
+// Async batch status responses
+class BatchResponseVm(
+    val requestId: Long,
+    val status: String
+)
+
+class BatchStatusVm(
+    val requestId: Long,
+    val status: String,
+    val shifts: List<ShiftStatusVm>
+)
+
+class ShiftStatusVm(
+    val shiftId: Long,
+    val status: String
 )
