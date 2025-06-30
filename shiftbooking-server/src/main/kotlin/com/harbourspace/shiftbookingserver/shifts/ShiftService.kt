@@ -1,21 +1,30 @@
 package com.harbourspace.shiftbookingserver.shifts
 
 import com.harbourspace.shiftbookingserver.sharding.ShardContext
+import com.harbourspace.shiftbookingserver.outbox.OutboxMessage
+import com.harbourspace.shiftbookingserver.outbox.OutboxRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.math.abs
 
 @Service
-class ShiftService(private val repository: ShiftRepository,
-                   @Value("\${sharding.shards:2}") private val shardCount: Int) {
+class ShiftService(
+    private val repository: ShiftRepository,
+    private val outboxRepository: OutboxRepository,
+    @Value("\${sharding.shards:2}") private val shardCount: Int
+) {
 
     private fun shardForCompany(companyId: String): Int = abs(companyId.hashCode()) % shardCount
 
+    @Transactional
     fun save(shift: Shift): Shift {
         val shard = shardForCompany(shift.companyId)
         ShardContext.setShard(shard)
         try {
-            return repository.save(shift)
+            val saved = repository.save(shift)
+            outboxRepository.save(OutboxMessage(payload = saved.id.toString()))
+            return saved
         } finally {
             ShardContext.clear()
         }
